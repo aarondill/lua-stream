@@ -96,10 +96,10 @@ end
 function Stream:filter(f)
   assert(type(f) == "function", "f must be of type function")
   return Stream.new(function()
-    local e, done = self.iter()
-    while not done do
+    while true do
+      local e, done = self.iter()
+      if done then break end
       if f(e) then return e, false end
-      e, done = self.iter()
     end
     return nil, true
   end)
@@ -113,11 +113,12 @@ function Stream:pack(n)
     local result, len = nil, 0
     for _ = 1, n do
       local e, done = self.iter()
-      if done then return result, result == nil end -- we're done if result is nil, else keep the result value!
+      if done then break end
       result = result or {}
       len = len + 1
       result[len] = e
     end
+    if not result then return nil, true end
     result.n = len
     return result, false
   end)
@@ -147,7 +148,7 @@ function Stream:flatmap(f)
     while true do
       if it == nil then -- we have no current iterator, generate a new one
         local e, done = self.iter()
-        if done then return nil, true end
+        if done then break end
         it = iterator(f(e)) -- support returning streams or iterators
       else -- call the iterator until it is exhausted
         local e, done = it()
@@ -155,6 +156,7 @@ function Stream:flatmap(f)
         it = nil
       end
     end
+    return nil, true
   end)
 end
 
@@ -170,8 +172,9 @@ end
 function Stream:distinct()
   local processed, seen_nil = {}, false
   return Stream.new(function()
-    local e, done = self.iter()
-    while not done do
+    while true do
+      local e, done = self.iter()
+      if done then break end
       if e == nil then -- note: we can't index with nil
         if not seen_nil then -- we haven't seen a nil yet, return it
           seen_nil = true
@@ -181,7 +184,6 @@ function Stream:distinct()
         processed[e] = true
         return e, false
       end
-      e, done = self.iter()
     end
     return nil, true
   end)
@@ -233,7 +235,7 @@ function Stream:skip(num)
     while i < num do -- skip n elements
       i = i + 1
       local _, done = self.iter()
-      if done then return nil, done end
+      if done then return nil, true end
     end
     return self.iter() -- return remaining elements
   end)
@@ -245,19 +247,19 @@ function Stream:last()
   local res = nil
   while true do
     local e, done = self.iter()
-    if done then return res end
+    if done then break end
     res = e
   end
+  return res
 end
 
 ---Performs the given action for each element of this stream.
 ---@param f fun(e: unknown): any?
 function Stream:foreach(f)
-  assert(type(f) == "function", "f must be of type function")
-  local e, done = self.iter()
-  while not done do
+  while true do
+    local e, done = self.iter()
+    if done then break end
     f(e)
-    e, done = self.iter()
   end
 end
 
@@ -267,11 +269,11 @@ end
 function Stream:toarray(ret)
   local result = ret or {}
   local i = result.n or #result
-  local e, done = self.iter()
-  while not done do
+  while true do
+    local e, done = self.iter()
+    if done then break end
     i = i + 1
     result[i] = e
-    e, done = self.iter()
   end
   result.n = i
   return result, i
@@ -299,8 +301,9 @@ end
 function Stream:group(f)
   assert(type(f) == "function", "f must be of type function")
   local result = {}
-  local e, done = self.iter()
-  while not done do
+  while true do
+    local e, done = self.iter()
+    if done then break end
     local key = f(e)
     local values = result[key]
     if values == nil then
@@ -308,7 +311,6 @@ function Stream:group(f)
       result[key] = values
     end
     values[#values + 1] = e
-    e, done = self.iter()
   end
   return result
 end
@@ -334,12 +336,12 @@ function Stream:split(f)
         amatch.n = amatch.n - 1 -- remove from the count
         return table.remove(amatch, 1), false
       end
-      local e, done = iter()
-      while not done do
+      while true do
+        local e, done = iter()
+        if done then break end
         if f(e) == match then return e, false end
         table.insert(anomatch, e)
         anomatch.n = anomatch.n + 1 -- add to the count
-        e, done = iter()
       end
       return nil, true
     end
@@ -405,10 +407,10 @@ function Stream:collect(c) return c(self.iter) end
 function Stream:reduce(init, op)
   assert(type(op) == "function", "f must be of type function")
   local result = init
-  local e, done = self.iter()
-  while not done do
+  while true do
+    local e, done = self.iter()
+    if done then break end
     result = op(result, e)
-    e, done = self.iter()
   end
   return result
 end
@@ -459,10 +461,10 @@ end
 ---@return integer
 function Stream:count()
   local result = 0
-  local _, done = self.iter()
-  while not done do
+  while true do
+    local _, done = self.iter()
+    if done then break end
     result = result + 1
-    _, done = self.iter()
   end
   return result
 end
@@ -477,7 +479,7 @@ function Stream:max(comp)
   local result = nil
   while true do
     local e, done = self.iter()
-    if done then return result end
+    if done then break end
     if result == nil then
       result = e
     elseif comp ~= nil then
@@ -486,6 +488,7 @@ function Stream:max(comp)
       if e > result then result = e end
     end
   end
+  return result
 end
 
 -- Returns the minimum element of this stream according to the provided comparator,
@@ -498,7 +501,7 @@ function Stream:min(comp)
   local result = nil
   while true do
     local e, done = self.iter()
-    if done then return result end
+    if done then break end
     if result == nil then
       result = e
     elseif comp ~= nil then
@@ -507,6 +510,7 @@ function Stream:min(comp)
       if e < result then result = e end
     end
   end
+  return result
 end
 
 ---Returns the sum of elements in this stream.
@@ -516,19 +520,20 @@ function Stream:sum()
   local result = 0
   while true do
     local e, done = self.iter()
-    if done then return result end
+    if done then break end
     result = result + e
   end
+  return result
 end
 
 -- Returns the arithmetic mean of elements of this stream, or nil if this stream is empty.
 function Stream:avg()
   local sum, count = 0, 0
-  local e, done = self.iter()
-  while not done do
+  while true do
+    local e, done = self.iter()
+    if done then break end
     count = count + 1
     sum = sum + e
-    e, done = self.iter()
   end
   if count == 0 then return nil end
   return sum / count
@@ -555,10 +560,10 @@ end
 ---@return boolean
 function Stream:allmatch(p)
   assert(type(p) == "function", "f must be of type function")
-  local e, done = self.iter()
-  while not done do
+  while true do
+    local e, done = self.iter()
+    if done then break end
     if not p(e) then return false end
-    e, done = self.iter()
   end
   return true
 end
@@ -569,10 +574,10 @@ end
 ---@return boolean
 function Stream:anymatch(p)
   assert(type(p) == "function", "f must be of type function")
-  local e, done = self.iter()
-  while not done do
+  while true do
+    local e, done = self.iter()
+    if done then break end
     if p(e) then return true end
-    e, done = self.iter()
   end
   return false
 end
