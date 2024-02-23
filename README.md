@@ -27,6 +27,11 @@ which results in the following output:
 5
 ```
 
+## License
+
+To pay respect to the original author ([Michael Karneim](https://github.com/mkarneim/)), the source code of Lua-Stream is in the public domain.
+For more information please read the LICENSE file.
+
 ## Supported Functions
 
 ### Creating a Stream
