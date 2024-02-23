@@ -607,6 +607,19 @@ function Stream.new(input)
   return setmetatable(self, { __index = Stream })
 end
 
+---This function acts exactly like Stream.new, but the stream ends when an element is nil
+---@param input unknown|StreamIterator<unknown>
+---@return Stream
+function Stream.nonnil(input)
+  local iter = iterator(input)
+  return Stream.new(function()
+    while true do
+      local e = iter()
+      return e, e == nil
+    end
+  end)
+end
+
 ---Returns an empty stream
 ---@return Stream
 function Stream.empty() return Stream.new(_empty_iter) end
