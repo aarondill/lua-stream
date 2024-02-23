@@ -85,10 +85,10 @@ end
 
 -- Returns a stream consisting of the results of applying the given function
 -- to the elements of this stream.
-function Stream:map(iter, f)
+function Stream:map(f)
   assert(type(f) == "function", "f must be of type function")
   return Stream.new(function()
-    local e = iter()
+    local e = self.iter()
     if e ~= nil then return f(e) end
     return nil
   end)
