@@ -4,7 +4,7 @@ local thisdir = thisfile:match("(.*)/") or "."
 local rootdir = thisdir .. "/.." -- HACK: This file must be at the root of the tests/ directory
 package.path = table.concat({ package.path, rootdir .. "/?.lua", rootdir .. "/?/init.lua" }, ";")
 
-local stream = require("stream")
+local stream = require("stream").new -- types go brr
 local function check(cond, format, ...)
   local message = string.format("Test Failed! " .. format, ...)
   assert(cond, message)
