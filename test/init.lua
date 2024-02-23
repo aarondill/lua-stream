@@ -13,10 +13,9 @@ end
 local function assert_equals(actual, expected)
   if type(expected) ~= "table" then return check(actual == expected, "actual=%s, expected=%s", actual, expected) end
   check(#actual == #expected, "#actual=%s, #expected=%s", #actual, #expected)
-  for i = 1, #actual do
+  for i, act in pairs(actual) do
     local exp = expected[i]
-    local act = actual[i]
-    check(act == exp, "actual[%d]=%s, expected[%d]=%s", i, act, i, exp)
+    check(act == exp, "actual[%s]=%s, expected[%s]=%s", i, act, i, exp)
   end
 end
 
@@ -117,6 +116,13 @@ do
   print("Testing max")
   local act = Stream.new({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):max()
   local exp = 9
+  assert_equals(act, exp)
+end
+
+do
+  print("Testing statistics")
+  local act = Stream.new({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):statistics()
+  local exp = { count = 9, sum = 45, min = 1, max = 9 }
   assert_equals(act, exp)
 end
 
