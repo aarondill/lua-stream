@@ -464,20 +464,33 @@ function Stream.iterate(seed, generator)
   end)
 end
 
+---Note: if start < end, the stream will count down
+---@param startInclusive integer
+---@param endExclusive integer
+---@return Stream
 function Stream.range(startInclusive, endExclusive)
-  if startInclusive >= endExclusive then return Stream.empty() end
-  return Stream.iterate(startInclusive, function(x)
-    local res = x + 1
-    if res >= endExclusive then return nil end
+  if startInclusive == endExclusive then return Stream.empty() end
+  local delta = endExclusive > startInclusive and 1 or -1
+  --- Note: (startInclusive - d) because the first result will be (startInclusive-d)+d
+  return Stream.iterate(startInclusive - delta, function(x)
+    local res = x + delta
+    if endExclusive > startInclusive and res >= endExclusive then return nil end
+    if endExclusive < startInclusive and res <= endExclusive then return nil end
     return res
   end)
 end
 
+---Note: if start < end, the stream will count down
+---@param startInclusive integer
+---@param endInclusive integer
+---@return Stream
 function Stream.rangeClosed(startInclusive, endInclusive)
-  if startInclusive > endInclusive then return Stream.empty() end
-  return Stream.iterate(startInclusive, function(x)
-    local res = x + 1
-    if res > endInclusive then return nil end
+  local delta = endInclusive >= startInclusive and 1 or -1
+  --- Note: (startInclusive - d) because the first result will be (startInclusive-d)+d
+  return Stream.iterate(startInclusive - delta, function(x)
+    local res = x + delta
+    if endInclusive > startInclusive and res > endInclusive then return nil end
+    if endInclusive < startInclusive and res < endInclusive then return nil end
     return res
   end)
 end
