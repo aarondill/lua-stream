@@ -3,68 +3,68 @@
 --- Setup package.path to ensure stream can be require'd
 --- This shouldn't be necessary in your own project!
 do
-    local thisfile = debug.getinfo(1, "S").source:sub(2)
-    local thisdir = thisfile:match("(.*)/") or "."
-    local rootdir = thisdir .. "/.." -- HACK: This file must be at the root of the examples/ directory
-    package.path = table.concat({ package.path, rootdir .. "/?.lua", rootdir .. "/?/init.lua" }, ";")
+  local thisfile = debug.getinfo(1, "S").source:sub(2)
+  local thisdir = thisfile:match("(.*)/") or "."
+  local rootdir = thisdir .. "/.." -- HACK: This file must be at the root of the examples/ directory
+  package.path = table.concat({ package.path, rootdir .. "/?.lua", rootdir .. "/?/init.lua" }, ";")
 end
 
 local stream = require("stream").new
 
 -- Here are some helper functions:
 local function isEven(x)
-    return x % 2 == 0
+  return x % 2 == 0
 end
 local function square(x)
-    return x * x
+  return x * x
 end
 local function myavg(iter)
-    local sum = 0
-    local count = 0
-    for e in iter do
-        count = count + 1
-        sum = sum + e
-    end
-    if count == 0 then
-        return nil
-    else
-        return sum / count
-    end
+  local sum = 0
+  local count = 0
+  for e in iter do
+    count = count + 1
+    sum = sum + e
+  end
+  if count == 0 then
+    return nil
+  else
+    return sum / count
+  end
 end
 local function range(s, e)
-    local count = 0
-    return function()
-        local result = s + count
-        if result <= e then
-            count = count + 1
-            return result
-        else
-            return nil
-        end
+  local count = 0
+  return function()
+    local result = s + count
+    if result <= e then
+      count = count + 1
+      return result
+    else
+      return nil
     end
+  end
 end
 local function fibbon(x)
-    local f = {}
-    if x > 0 then
-        f[1] = 1
-        if x > 1 then
-            f[2] = 1
-            for i = 3, x do
-                f[i] = f[i - 2] + f[i - 1]
-            end
-        end
+  local f = {}
+  if x > 0 then
+    f[1] = 1
+    if x > 1 then
+      f[2] = 1
+      for i = 3, x do
+        f[i] = f[i - 2] + f[i - 1]
+      end
     end
-    return f
+  end
+  return f
 end
 local function sum(a, b)
-    return a + b
+  return a + b
 end
 
 -- Here starts the demo:
 
 print("iter")
 for i in stream({ 1, 2, 3, 4, 5 }).iter do
-    print(i)
+  print(i)
 end
 
 print("foreach")
@@ -116,7 +116,7 @@ print(_myavg)
 print("toarray")
 local array = stream({ 1, 2, 3, 4, 5 }):toarray()
 for i = 1, #array do
-    print(array[i])
+  print(array[i])
 end
 
 print("range")
