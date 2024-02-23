@@ -158,6 +158,26 @@ function Stream:distinct()
   end)
 end
 
+---Returns true if the stream is equal to the provided stream or array.
+---Note: since nils aren't allowed in the stream, an array is considered equal
+---if all elements up to the first nil are equal
+---@param other Stream|unknown[]
+---@param cond? fun(a: unknown, b: unknown): boolean default is a==b
+function Stream:equals(other, cond)
+  assert(type(other) == "table", "other must be of type table") -- Note: function iterators are not supported. If you must, create a stream and pass it.
+  cond = cond or function(a, b) return a == b end
+  local oiter = iterator(other)
+  for a in self.iter do
+    local b = oiter()
+    if b == nil then return false end -- other is empty
+    if not cond(a, b) then return false end -- other is not equal
+  end -- we are now empty
+  for _ in oiter do
+    return false -- other is not empty
+  end
+  return true
+end
+
 -- Returns a stream consisting of the elements of this stream,
 -- truncated to be no longer than maxsize in length.
 function Stream:limit(max)
