@@ -329,6 +329,63 @@ do
 end
 
 do
+  print("Testing unpack 1")
+  local exp = { 1, 2, 3, 4, 5, n = 5 }
+  local act = table.pack(Stream.new({ 1, 2, 3, 4, 5 }):unpack())
+  assert_equals(act, exp)
+end
+
+do
+  print("Testing unpack 2")
+  local exp = { 2, 3, 4, n = 3 }
+  local act = table.pack(Stream.new({ 1, 2, 3, 4, 5 }):limit(4):skip(1):unpack())
+  assert_equals(act, exp)
+end
+
+do
+  print("Testing join")
+  local act = Stream.new({ 1, 2, 3, 4, 5 }):join(" ")
+  local exp = "1 2 3 4 5"
+  assert_equals(act, exp)
+end
+
+do
+  print("Testing equal 1")
+  local act = Stream.new({ 1, 2, 3, 4, 5 }):equals(Stream.new({ 1, 2, 3, 4, 5 }))
+  local exp = true
+  assert_equals(act, exp)
+end
+
+do
+  print("Testing equal 2")
+  local act = Stream.new({ 1, 2, 3, 4, 5 }):equals({ 1, 2, 2, 4, 5 })
+  local exp = false
+  assert_equals(act, exp)
+end
+
+do
+  print("Testing equal 3")
+  local act = Stream.new({ 1, 2, 3, 4, 5 }):equals({ 1, 2, 3, 4, 5, 6 })
+  local exp = false
+  assert_equals(act, exp)
+end
+
+do
+  print("Testing equal 4")
+  local act = Stream.new({ 1, 2, 3, 4, 5 }):equals({ 1, 2, 3, 4 })
+  local exp = false
+  assert_equals(act, exp)
+end
+
+do
+  print("Testing equal 5")
+  local act = Stream.new({ 1, 2, 3, 4, 5 })
+    :equals({ -1, -2, -3, -4, -5 }, function(a, b) return math.abs(a) == math.abs(b) end)
+  local exp = true
+  assert_equals(act, exp)
+end
+
+do
   print("Testing pack")
   local aexp = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7, 8 }, { 9 } }
   local aact = Stream.new({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }):pack(2):toarray()
