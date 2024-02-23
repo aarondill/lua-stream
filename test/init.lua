@@ -4,6 +4,7 @@ local thisfile = debug.getinfo(1, "S").source:sub(2)
 local thisdir = thisfile:match("(.*)/") or "."
 local rootdir = thisdir .. "/.." -- HACK: This file must be at the root of the tests/ directory
 package.path = table.concat({ package.path, rootdir .. "/?.lua", rootdir .. "/?/init.lua" }, ";")
+local unpack = unpack or table.unpack
 
 local Stream = require("stream")
 local function check(cond, format, ...)
@@ -13,7 +14,8 @@ end
 
 local function assert_equals(actual, expected)
   if type(expected) ~= "table" then return check(actual == expected, "actual=%s, expected=%s", actual, expected) end
-  check(#actual == #expected, "#actual=%s, #expected=%s", #actual, #expected)
+  local actualn, expectedn = actual.n or #actual, expected.n or #expected
+  check(actualn == expectedn, "#actual=%s, #expected=%s", actualn, expectedn)
   for i, act in pairs(actual) do
     local exp = expected[i]
     check(act == exp, "actual[%s]=%s, expected[%s]=%s", i, act, i, exp)
@@ -22,14 +24,14 @@ end
 
 do
   print("Testing toarray 1")
-  local aexp = { 1, 2, 3, 4, 5 }
+  local aexp = { 1, 2, 3, 4, 5, n = 5 }
   local aact = Stream.new({ 1, 2, 3, 4, 5 }):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing toarray 2")
-  local aexp = { 1, 2, 1, 2, 3, 4, 5 }
+  local aexp = { 1, 2, 1, 2, 3, 4, 5, n = 7 }
   local aact = Stream.new({ 1, 2, 3, 4, 5 }):toarray({ 1, 2 })
   assert_equals(aact, aexp)
 end
@@ -42,12 +44,28 @@ do
 end
 
 do
-  print("Testing iter")
+  print("Testing iter 1")
   local exp = 0
   for act in Stream.new({ 1, 2, 3, 4, 5 }).iter do
     exp = exp + 1
     assert_equals(act, exp)
   end
+end
+
+do
+  print("Testing iter 2")
+  local exp = { 1, 2, 3, nil, 4, 5, n = 6 }
+  local act = {}
+  local n = 0
+  local it = Stream.of(1, 2, 3, nil, 4, 5).iter
+  local e, done = it()
+  while not done do
+    n = n + 1
+    act[n] = e
+    e, done = it()
+  end
+  act.n = n
+  assert_equals(act, exp)
 end
 
 do
@@ -62,21 +80,21 @@ end
 do
   print("Testing filter")
   local function isEven(x) return x % 2 == 0 end
-  local aexp = { 2, 4, 6, 8 }
+  local aexp = { 2, 4, 6, 8, n = 4 }
   local aact = Stream.new({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }):filter(isEven):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing reverse")
-  local aexp = { 5, 4, 3, 2, 1 }
+  local aexp = { 5, 4, 3, 2, 1, n = 5 }
   local aact = Stream.new({ 1, 2, 3, 4, 5 }):reverse():toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing sort")
-  local aexp = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+  local aexp = { 1, 2, 3, 4, 5, 6, 7, 8, 9, n = 9 }
   local aact = Stream.new({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):sort():toarray()
   assert_equals(aact, aexp)
 end
@@ -84,7 +102,7 @@ end
 do
   print("Testing map")
   local function square(x) return x * x end
-  local aexp = { 1, 4, 9, 16, 25 }
+  local aexp = { 1, 4, 9, 16, 25, n = 5 }
   local aact = Stream.new({ 1, 2, 3, 4, 5 }):map(square):toarray()
   assert_equals(aact, aexp)
 end
@@ -94,16 +112,32 @@ do
   local aexp = { 1, 2, 3 }
   local aact = {}
   local s = Stream.new({ 1, 2, 3 })
-  for _ = 1, #aexp do
-    aact[#aact + 1] = s:next()
+  local e, done = s:next()
+  while not done do
+    aact[#aact + 1] = e
+    e, done = s:next()
   end
   assert_equals(aact, aexp)
 end
 
 do
-  print("Testing last")
+  print("Testing last 1")
   local act = Stream.new({ 2, 2, 2, 2, 1 }):last()
   local exp = 1
+  assert_equals(act, exp)
+end
+
+do
+  print("Testing last 2")
+  local act = Stream.new({ 2, 2, 2, 2, 1, nil, n = 6 }):last()
+  local exp = nil
+  assert_equals(act, exp)
+end
+
+do
+  print("Testing last 3")
+  local act = Stream.new({ 2, 2, 2, 2, 1, nil, 3, n = 7 }):last()
+  local exp = 3
   assert_equals(act, exp)
 end
 
@@ -115,9 +149,16 @@ do
 end
 
 do
-  print("Testing max")
+  print("Testing max 1")
   local act = Stream.new({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):max()
   local exp = 9
+  assert_equals(act, exp)
+end
+
+do
+  print("Testing max 2")
+  local act = Stream.new({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):max(function(a, b) return a > b end)
+  local exp = 1
   assert_equals(act, exp)
 end
 
@@ -164,28 +205,28 @@ end
 
 do
   print("Testing limit")
-  local aexp = { 1, 2, 3 }
+  local aexp = { 1, 2, 3, n = 3 }
   local aact = Stream.new({ 1, 2, 3, 4, 5 }):limit(3):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing skip")
-  local aexp = { 4, 5 }
+  local aexp = { 4, 5, n = 2 }
   local aact = Stream.new({ 1, 2, 3, 4, 5 }):skip(3):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing reverse")
-  local aexp = { 5, 4, 3, 2, 1 }
+  local aexp = { 5, 4, 3, 2, 1, n = 5 }
   local aact = Stream.new({ 1, 2, 3, 4, 5 }):reverse():toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing distinct")
-  local aexp = { 1, 2, 4, 5, 3 }
+  local aexp = { 1, 2, 4, 5, 3, n = 5 }
   local aact = Stream.new({ 1, 2, 4, 2, 4, 2, 5, 3, 5, 1 }):distinct():toarray()
   assert_equals(aact, aexp)
 end
@@ -195,7 +236,7 @@ do
   local aexp = { 1, 2, 3, 4, 5 }
   local aact = {}
   local function consume(x) aact[#aact + 1] = x end
-  Stream.new({ 1, 2, 3, 4, 5 }):peek(consume):toarray()
+  Stream.new({ 1, 2, 3, 4, 5 }):peek(consume):count()
   assert_equals(aact, aexp)
 end
 
@@ -250,42 +291,42 @@ end
 do
   print("Testing flatmap")
   local function duplicate(x) return { x, x } end
-  local aexp = { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 }
+  local aexp = { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, n = 10 }
   local aact = Stream.new({ 1, 2, 3, 4, 5 }):flatmap(duplicate):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing flatten")
-  local aexp = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+  local aexp = { 1, 2, 3, 4, 5, 6, 7, 8, 9, n = 9 }
   local aact = Stream.new({ { 1, 2 }, { 3, 4, 5, 6 }, { 7 }, {}, { 8, 9 } }):flatten():toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing concat 1")
-  local aexp = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+  local aexp = { 1, 2, 3, 4, 5, 6, 7, 8, 9, n = 9 }
   local aact = Stream.new({ 1, 2, 3, 4 }):concat(Stream.new({ 5, 6, 7, 8, 9 })):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing concat 2")
-  local aexp = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+  local aexp = { 1, 2, 3, 4, 5, 6, 7, 8, 9, n = 9 }
   local aact = Stream.new({ 1, 2, 3, 4 }):concat(Stream.new({ 5, 6 }), Stream.new({ 7, 8, 9 })):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing merge 1")
-  local aexp = { 1, 5, 2, 6, 3, 7, 4, 8, 9 }
+  local aexp = { 1, 5, 2, 6, 3, 7, 4, 8, 9, n = 9 }
   local aact = Stream.new({ 1, 2, 3, 4 }):merge(Stream.new({ 5, 6, 7, 8, 9 })):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing merge 2")
-  local aexp = { 1, 5, 7, 2, 6, 8, 3, 9, 4 }
+  local aexp = { 1, 5, 7, 2, 6, 8, 3, 9, 4, n = 9 }
   local aact = Stream.new({ 1, 2, 3, 4 }):merge(Stream.new({ 5, 6 }), Stream.new({ 7, 8, 9 })):toarray()
   assert_equals(aact, aexp)
 end
@@ -311,8 +352,8 @@ end
 do
   print("Testing split")
   local function is_odd(x) return x % 2 == 0 end
-  local aexp1 = { 2, 4 }
-  local aexp2 = { 1, 3 }
+  local aexp1 = { 2, 4, n = 2 }
+  local aexp2 = { 1, 3, n = 2 }
   local s1, s2 = Stream.new({ 1, 2, 3, 4 }):split(is_odd)
 
   do
@@ -394,11 +435,11 @@ end
 
 do
   print("Testing pack")
-  local aexp = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7, 8 }, { 9 } }
+  local aexp = { { 1, 2, n = 2 }, { 3, 4, n = 2 }, { 5, 6, n = 2 }, { 7, 8, n = 2 }, { 9, n = 1 }, n = 5 }
   local aact = Stream.new({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }):pack(2):toarray()
 
-  check(#aact == #aexp, "#aact=%s, #aexp=%s", #aact, #aexp)
-  for i = 1, #aact do -- Note: can't use assert_equals here because it's not recursive
+  check(aact.n == aexp.n, "#aact=%s, #aexp=%s", #aact, #aexp)
+  for i = 1, aact.n do -- Note: can't use assert_equals here because it's not recursive
     local exp = aexp[i]
     local act = aact[i]
     assert_equals(act, exp)
@@ -407,81 +448,89 @@ end
 
 do
   print("Testing Stream.range 1")
-  local aexp = { 1, 2, 3, 4, 5, 6 }
+  local aexp = { 1, 2, 3, 4, 5, 6, n = 6 }
   local aact = Stream.range(1, 7):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing Stream.range 2")
-  local aexp = { 6, 5, 4, 3, 2, 1 }
+  local aexp = { 6, 5, 4, 3, 2, 1, n = 6 }
   local aact = Stream.range(6, 0):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing Stream.range 3")
-  local aexp = {}
+  local aexp = { n = 0 }
   local aact = Stream.range(1, 1):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing Stream.rangeclosed 1")
-  local aexp = { 1, 2, 3, 4, 5, 6, 7 }
+  local aexp = { 1, 2, 3, 4, 5, 6, 7, n = 7 }
   local aact = Stream.rangeclosed(1, 7):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing Stream.rangeclosed 2")
-  local aexp = { 7, 6, 5, 4, 3, 2, 1 }
+  local aexp = { 7, 6, 5, 4, 3, 2, 1, n = 7 }
   local aact = Stream.rangeclosed(7, 1):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing Stream.rangeclosed 3")
-  local aexp = { 1 }
+  local aexp = { 1, n = 1 }
   local aact = Stream.rangeclosed(1, 1):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing Stream.empty 1")
-  local aexp = {}
+  local aexp = { n = 0 }
   local aact = Stream.empty():toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing Stream.empty 2")
-  local exp = nil
-  local act = Stream.empty():next()
+  local exp, exp2 = nil, true
+  local act, act2 = Stream.empty():next()
   assert_equals(act, exp)
+  assert_equals(act2, exp2)
 end
 
 do
   print("Testing Stream.of")
-  local aexp = { 1, 2, 3, 4, 5, 6, 7 }
+  local aexp = { 1, 2, 3, 4, 5, 6, 7, n = 7 }
   local aact = Stream.of(1, 2, 3, 4, 5, 6, 7):toarray()
   assert_equals(aact, aexp)
 end
 
 do
+  print("Testing Stream.of 2")
+  local aexp = { 1, 2, 3, 4, nil, 6, 7, n = 7 }
+  local aact = Stream.of(1, 2, 3, 4, nil, 6, 7):toarray()
+  assert_equals(aact, aexp)
+end
+
+do
   print("Testing Stream.iterate 1")
-  local incr = function(x) return x + 1 end
-  local aexp = { 1, 2, 3, 4, 5, 6, 7 }
+  local incr = function(x) return x + 1, false end
+  local aexp = { 1, 2, 3, 4, 5, 6, 7, n = 7 }
   local aact = Stream.iterate(0, incr):limit(#aexp):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing Stream.iterate 2")
-  local aexp = { 1, 2, 3, 4, 5, 6, 7 }
+  local aexp = { 1, 2, 3, 4, 5, 6, 7, n = 7 }
   local incr = function(x)
-    if x >= #aexp then return nil end
-    return x + 1
+    if x >= #aexp then return nil, true end
+    return x + 1, false
   end
   local aact = Stream.iterate(0, incr):toarray()
   assert_equals(aact, aexp)
