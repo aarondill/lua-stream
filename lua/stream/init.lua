@@ -351,6 +351,13 @@ function Stream:sort(comp)
   return Stream.new(result)
 end
 
+--- Returns the concatenation of elements by delim
+--- See table.concat for details
+function Stream:join(delim)
+  local result = self:toarray()
+  return table.sort(result, delim)
+end
+
 -- Returns the count of elements in this stream.
 function Stream:count()
   local result = 0
