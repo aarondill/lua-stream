@@ -364,11 +364,12 @@ function Stream:join(delim)
 end
 
 --- Returns each element of this stream
----@param i? integer
----@param j? integer
+--- Note: to use unpack(s, i, j), call stream:limit(j):skip(i):unpack()
 ---@return ...: the stream elements
-function Stream:unpack(i, j)
-  return unpack(self:toarray(), i, j)
+--- NOTE: unpack has an inherent limit on the number of elements it can return
+--- (around 255). If you need more, use :toarray instead!
+function Stream:unpack()
+  return unpack(self:toarray())
 end
 
 -- Returns the count of elements in this stream.
