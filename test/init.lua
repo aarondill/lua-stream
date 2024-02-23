@@ -21,9 +21,16 @@ local function assert_equals(actual, expected)
 end
 
 do
-  print("Testing toarray")
+  print("Testing toarray 1")
   local aexp = { 1, 2, 3, 4, 5 }
   local aact = Stream.new({ 1, 2, 3, 4, 5 }):toarray()
+  assert_equals(aact, aexp)
+end
+
+do
+  print("Testing toarray 2")
+  local aexp = { 1, 2, 1, 2, 3, 4, 5 }
+  local aact = Stream.new({ 1, 2, 3, 4, 5 }):toarray({ 1, 2 })
   assert_equals(aact, aexp)
 end
 

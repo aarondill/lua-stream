@@ -222,9 +222,11 @@ function Stream:foreach(f)
 end
 
 -- Returns an array containing the elements of this stream.
-function Stream:toarray()
-  local result = {}
-  local i = 0
+---@param ret? unknown[] An array to append to - note: begins at first non-nil element!
+---@return unknown[]
+function Stream:toarray(ret)
+  local result = ret or {}
+  local i = #result
   for e in self.iter do
     i = i + 1
     result[i] = e
