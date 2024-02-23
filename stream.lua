@@ -255,18 +255,17 @@ function Stream:merge(...)
   return Stream.new(function()
     local len = #itarr
     if len == 0 then return nil end
-    local ix = 1
-    while ix <= len do
+    for i = 1, len do
       if idx > len then idx = 1 end
       local it = itarr[idx]
       local e = it()
       if e ~= nil then
         idx = idx + 1
         return e
+      else
+        table.remove(itarr, idx)
+        len = #itarr
       end
-      table.remove(itarr, idx)
-      len = #itarr
-      ix = ix + 1
     end
 
     local nilcount = 0
@@ -279,10 +278,14 @@ function Stream:merge(...)
         result[i - nilcount] = e
       end
     end
-    if nilcount >= #itarr then return nil end
-    return result
+    if nilcount >= #itarr then
+      return nil
+    else
+      return result
+    end
   end)
 end
+
 -- Returns the result of the given collector that is supplied
 -- with an iterator for the elements of this stream.
 function Stream:collect(c)
