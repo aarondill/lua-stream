@@ -484,12 +484,12 @@ end
 ---@param startInclusive integer
 ---@param endInclusive integer
 ---@return Stream
-function Stream.rangeClosed(startInclusive, endInclusive)
+function Stream.rangeclosed(startInclusive, endInclusive)
   local delta = endInclusive >= startInclusive and 1 or -1
   --- Note: (startInclusive - d) because the first result will be (startInclusive-d)+d
   return Stream.iterate(startInclusive - delta, function(x)
     local res = x + delta
-    if endInclusive > startInclusive and res > endInclusive then return nil end
+    if endInclusive >= startInclusive and res > endInclusive then return nil end
     if endInclusive < startInclusive and res < endInclusive then return nil end
     return res
   end)
