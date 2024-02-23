@@ -353,9 +353,11 @@ end
 
 --- Returns the concatenation of elements by delim
 --- See table.concat for details
+---@param delim? string
+---@return string
 function Stream:join(delim)
   local result = self:toarray()
-  return table.sort(result, delim)
+  return table.concat(result, delim)
 end
 
 -- Returns the count of elements in this stream.
