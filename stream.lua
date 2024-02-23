@@ -428,4 +428,9 @@ function Stream.new(input)
   }, { __index = Stream })
 end
 
-return Stream.new
+--- The metatable for the stream module.
+local mt = {}
+function mt:__call(...)
+  return Stream.new(...)
+end
+return setmetatable(Stream, mt)
