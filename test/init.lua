@@ -1,3 +1,4 @@
+#!/usr/bin/env lua
 -- Test cases for Lua Stream API
 local thisfile = debug.getinfo(1, "S").source:sub(2)
 local thisdir = thisfile:match("(.*)/") or "."

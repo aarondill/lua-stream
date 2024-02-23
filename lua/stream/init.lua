@@ -1,3 +1,6 @@
+---Disable the duplicate warnings because they incorrectly mark all definitions in this file as duplicate (due to the symlink)
+---@diagnostic disable: duplicate-set-field
+---@diagnostic disable: duplicate-doc-alias
 ---@class Stream
 local Stream = {}
 
@@ -276,7 +279,7 @@ function Stream:merge(...)
   return Stream.new(function()
     local len = #itarr
     if len == 0 then return nil end
-    for i = 1, len do
+    for _ = 1, len do
       if idx > len then idx = 1 end
       local it = itarr[idx]
       local e = it()
