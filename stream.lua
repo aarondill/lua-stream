@@ -315,6 +315,10 @@ end
 
 -- Performs a reduction on the elements of this stream, using the provided initial value
 -- and the associative accumulation function, and returns the reduced value.
+---@generic T
+---@param init T
+---@param op fun(acc: T, e: unknown): T
+---@return T
 function Stream:reduce(init, op)
   assert(type(op) == "function", "f must be of type function")
   local result = init
@@ -395,6 +399,21 @@ function Stream:avg()
   end
   if count == 0 then return nil end
   return sum / count
+end
+---@alias statistics {count: integer, sum: integer, min: integer, max: integer}
+
+---Note: All elements of the stream must be able to be added to each other, else an error is thrown
+---@return statistics
+function Stream:statistics()
+  ---@type statistics
+  local statistics = { count = 0, sum = 0, min = math.huge, max = -math.huge }
+  return self:reduce(statistics, function(stats, e)
+    stats.count = stats.count + 1
+    stats.sum = stats.sum + e
+    if e < stats.min then stats.min = e end
+    if e > stats.max then stats.max = e end
+    return stats
+  end)
 end
 
 -- Returns whether all elements of this stream match the provided predicate.
