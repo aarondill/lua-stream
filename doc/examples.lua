@@ -12,12 +12,8 @@ end
 local stream = require("stream").new
 
 -- Here are some helper functions:
-local function isEven(x)
-  return x % 2 == 0
-end
-local function square(x)
-  return x * x
-end
+local function isEven(x) return x % 2 == 0 end
+local function square(x) return x * x end
 local function myavg(iter)
   local sum = 0
   local count = 0
@@ -56,9 +52,7 @@ local function fibbon(x)
   end
   return f
 end
-local function sum(a, b)
-  return a + b
-end
+local function sum(a, b) return a + b end
 
 -- Here starts the demo:
 

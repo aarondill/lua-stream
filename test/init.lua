@@ -47,18 +47,14 @@ do
   print("Testing foreach")
   local aexp = { 1, 2, 3, 4, 5 }
   local aact = {}
-  local function consume(x)
-    aact[#aact + 1] = x
-  end
+  local function consume(x) aact[#aact + 1] = x end
   Stream.new({ 1, 2, 3, 4, 5 }):foreach(consume)
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing filter")
-  local function isEven(x)
-    return x % 2 == 0
-  end
+  local function isEven(x) return x % 2 == 0 end
   local aexp = { 2, 4, 6, 8 }
   local aact = Stream.new({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }):filter(isEven):toarray()
   assert_equals(aact, aexp)
@@ -80,9 +76,7 @@ end
 
 do
   print("Testing map")
-  local function square(x)
-    return x * x
-  end
+  local function square(x) return x * x end
   local aexp = { 1, 4, 9, 16, 25 }
   local aact = Stream.new({ 1, 2, 3, 4, 5 }):map(square):toarray()
   assert_equals(aact, aexp)
@@ -193,18 +187,14 @@ do
   print("Testing peek")
   local aexp = { 1, 2, 3, 4, 5 }
   local aact = {}
-  local function consume(x)
-    aact[#aact + 1] = x
-  end
+  local function consume(x) aact[#aact + 1] = x end
   Stream.new({ 1, 2, 3, 4, 5 }):peek(consume):toarray()
   assert_equals(aact, aexp)
 end
 
 do
   print("Testing allmatch true")
-  local function is_odd(x)
-    return x % 2 == 0
-  end
+  local function is_odd(x) return x % 2 == 0 end
   local act = Stream.new({ 2, 4, 6, 8, 10 }):allmatch(is_odd)
   local exp = true
   assert_equals(act, exp)
@@ -212,9 +202,7 @@ end
 
 do
   print("Testing allmatch false")
-  local function is_odd(x)
-    return x % 2 == 0
-  end
+  local function is_odd(x) return x % 2 == 0 end
   local act = Stream.new({ 2, 4, 6, 8, 11 }):allmatch(is_odd)
   local exp = false
   assert_equals(act, exp)
@@ -222,9 +210,7 @@ end
 
 do
   print("Testing anymatch true")
-  local function is_odd(x)
-    return x % 2 == 0
-  end
+  local function is_odd(x) return x % 2 == 0 end
   local act = Stream.new({ 1, 2, 3 }):anymatch(is_odd)
   local exp = true
   assert_equals(act, exp)
@@ -232,9 +218,7 @@ end
 
 do
   print("Testing anymatch false")
-  local function is_odd(x)
-    return x % 2 == 0
-  end
+  local function is_odd(x) return x % 2 == 0 end
   local act = Stream.new({ 1, 3, 5, 7 }):anymatch(is_odd)
   local exp = false
   assert_equals(act, exp)
@@ -242,9 +226,7 @@ end
 
 do
   print("Testing nonematch true")
-  local function is_odd(x)
-    return x % 2 == 0
-  end
+  local function is_odd(x) return x % 2 == 0 end
   local act = Stream.new({ 1, 3, 5, 7 }):nonematch(is_odd)
   local exp = true
   assert_equals(act, exp)
@@ -252,9 +234,7 @@ end
 
 do
   print("Testing nonematch false")
-  local function is_odd(x)
-    return x % 2 == 0
-  end
+  local function is_odd(x) return x % 2 == 0 end
   local act = Stream.new({ 1, 2, 3 }):nonematch(is_odd)
   local exp = false
   assert_equals(act, exp)
@@ -262,9 +242,7 @@ end
 
 do
   print("Testing flatmap")
-  local function duplicate(x)
-    return { x, x }
-  end
+  local function duplicate(x) return { x, x } end
   local aexp = { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 }
   local aact = Stream.new({ 1, 2, 3, 4, 5 }):flatmap(duplicate):toarray()
   assert_equals(aact, aexp)
@@ -307,9 +285,7 @@ end
 
 do
   print("Testing group")
-  local function is_odd(x)
-    return x % 2 == 0
-  end
+  local function is_odd(x) return x % 2 == 0 end
   local aexp1 = { 2, 4 }
   local aexp2 = { 1, 3 }
   local mact = Stream.new({ 1, 2, 3, 4 }):group(is_odd)
@@ -327,9 +303,7 @@ end
 
 do
   print("Testing split")
-  local function is_odd(x)
-    return x % 2 == 0
-  end
+  local function is_odd(x) return x % 2 == 0 end
   local aexp1 = { 2, 4 }
   local aexp2 = { 1, 3 }
   local s1, s2 = Stream.new({ 1, 2, 3, 4 }):split(is_odd)
@@ -348,9 +322,7 @@ end
 
 do
   print("Testing reduce")
-  local function add(a, b)
-    return a + b
-  end
+  local function add(a, b) return a + b end
   local act = Stream.new({ 1, 2, 3, 4, 5 }):reduce(0, add)
   local exp = 15
   assert_equals(act, exp)
@@ -434,9 +406,7 @@ end
 
 do
   print("Testing Stream.iterate 1")
-  local incr = function(x)
-    return x + 1
-  end
+  local incr = function(x) return x + 1 end
   local aexp = { 1, 2, 3, 4, 5, 6, 7 }
   local aact = Stream.iterate(0, incr):limit(#aexp):toarray()
   assert_equals(aact, aexp)
