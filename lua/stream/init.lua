@@ -638,8 +638,10 @@ function Stream.of(...) return Stream.new(pack(...)) end
 ---@param generator fun(prev: T): T, done: boolean
 ---@return Stream
 function Stream.iterate(seed, generator)
+  local done, e
   return Stream.new(function()
-    local e, done = generator(seed)
+    if done then return nil, true end -- we've already emptied this generator.
+    e, done = generator(seed) -- get the next element and done
     seed = e -- use for the next time
     return e, done
   end)
