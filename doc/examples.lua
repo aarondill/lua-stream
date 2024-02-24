@@ -9,7 +9,7 @@ do
   package.path = table.concat({ package.path, rootdir .. "/?.lua", rootdir .. "/?/init.lua" }, ";")
 end
 
-local stream = require("stream").new
+local stream = require("stream")
 
 -- Here are some helper functions:
 local function isEven(x) return x % 2 == 0 end
@@ -25,18 +25,6 @@ local function myavg(iter)
     return nil
   else
     return sum / count
-  end
-end
-local function range(s, e)
-  local count = 0
-  return function()
-    local result = s + count
-    if result <= e then
-      count = count + 1
-      return result
-    else
-      return nil
-    end
   end
 end
 local function fibbon(x)
@@ -56,125 +44,194 @@ local function sum(a, b) return a + b end
 
 -- Here starts the demo:
 
-print("iter")
-for i in stream({ 1, 2, 3, 4, 5 }).iter do
-  print(i)
+do
+  print("iter")
+  local it = stream.new({ 1, 2, 3, 4, 5 }).iter
+  local i, done = it()
+  while not done do
+    print(i)
+    i, done = it()
+  end
 end
 
-print("foreach")
-stream({ 1, 2, 3, 4, 5 }):foreach(print)
-
-print("filter")
-stream({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }):filter(isEven):foreach(print)
-
-print("reverse")
-stream({ 1, 2, 3, 4, 5 }):reverse():foreach(print)
-
-print("sort")
-stream({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):sort():foreach(print)
-
-print("map")
-stream({ 1, 2, 3, 4, 5 }):map(square):foreach(print)
-
-print("next")
-local s1 = stream({ 1, 2, 3, 4, 5 })
-local first = s1:next()
-print(first)
-local second = s1:next()
-print(second)
-
-print("last")
-local last = stream({ 1, 2, 3, 4, 5 }):last()
-print(last)
-
-print("max")
-local max = stream({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):max()
-print(max)
-
-print("min")
-local min = stream({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):min()
-print(min)
-
-print("sum")
-local _sum = stream({ 1, 2, 3, 4, 5 }):sum()
-print(_sum)
-
-print("avg")
-local avg = stream({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):avg()
-print(avg)
-
-print("collect(myavg)")
-local _myavg = stream({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):collect(myavg)
-print(_myavg)
-
-print("toarray")
-local array = stream({ 1, 2, 3, 4, 5 }):toarray()
-for i = 1, #array do
-  print(array[i])
+do
+  print("foreach")
+  stream.new({ 1, 2, 3, 4, 5 }):foreach(print)
 end
 
-print("range")
-stream(range(1, 5)):foreach(print)
+do
+  print("filter")
+  stream.new({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }):filter(isEven):foreach(print)
+end
 
-print("limit")
-stream(math.random):limit(5):foreach(print)
+do
+  print("reverse")
+  stream.new({ 1, 2, 3, 4, 5 }):reverse():foreach(print)
+end
 
-print("count")
-local count = stream({ 1, 2, 3, 4, 5 }):count()
-print(count)
+do
+  print("sort")
+  stream.new({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):sort():foreach(print)
+end
 
-print("skip")
-stream({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }):skip(5):foreach(print)
+do
+  print("map")
+  stream.new({ 1, 2, 3, 4, 5 }):map(square):foreach(print)
+end
 
-print("reverse")
-stream({ 1, 2, 3, 4, 5 }):reverse():foreach(print)
+do
+  print("next")
+  local s1 = stream.new({ 1, 2, 3, 4, 5 })
+  local first, firstdone = s1:next()
+  if not firstdone then
+    print(first)
+    local second, seconddone = s1:next()
+    if not seconddone then print(second) end
+  end
+end
 
-print("distinct")
-stream({ 1, 2, 3, 2, 4, 2, 5, 2, 5, 1 }):distinct():foreach(print)
+do
+  print("last")
+  local last = stream.new({ 1, 2, 3, 4, 5 }):last()
+  print(last)
+end
 
-print("peek")
-stream({ 1, 2, 3, 4 }):peek(print):last()
+do
+  print("max")
+  local max = stream.new({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):max()
+  print(max)
+end
 
-print("allmatch")
-local allmatch = stream({ 2, 4, 6, 8 }):allmatch(isEven)
-print(allmatch)
+do
+  print("min")
+  local min = stream.new({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):min()
+  print(min)
+end
 
-print("anymatch")
-local anymatch = stream({ 1, 2, 3 }):anymatch(isEven)
-print(anymatch)
+do
+  print("sum")
+  local _sum = stream.new({ 1, 2, 3, 4, 5 }):sum()
+  print(_sum)
+end
 
-print("nonematch")
-local nonematch = stream({ 1, 3, 5, 7 }):nonematch(isEven)
-print(nonematch)
+do
+  print("avg")
+  local avg = stream.new({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):avg()
+  print(avg)
+end
 
-print("flatmap")
-stream({ 0, 4, 5 }):flatmap(fibbon):foreach(print)
+do
+  print("collect(myavg)")
+  local _myavg = stream.new({ 5, 7, 6, 3, 4, 1, 2, 8, 9 }):collect(myavg)
+  print(_myavg)
+end
 
-print("flatten")
-stream({ { 1, 2, 3 }, { 4, 5 }, { 6 }, {}, { 7, 8, 9 } }):flatten():foreach(print)
+do
+  print("toarray")
+  local array = stream.new({ 1, 2, 3, 4, 5 }):toarray()
+  for idx = 1, array.n do
+    print(array[idx])
+  end
+end
 
-print("concat 1")
-stream({ 1, 2, 3, 4, 5 }):concat(stream({ 6, 7, 8, 9 })):foreach(print)
+do
+  print("range")
+  stream.rangeclosed(1, 5):foreach(print)
+end
 
-print("concat 2")
-stream({ 1, 2, 3 }):concat(stream({ 4, 5, 6 }), stream({ 7, 8, 9 })):foreach(print)
+do
+  print("limit")
+  stream.new(math.random):limit(5):foreach(print)
+end
 
-print("group")
-local group = stream({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }):group(isEven)
-stream(group[true]):foreach(print)
-stream(group[false]):foreach(print)
+do
+  print("count")
+  local count = stream.new({ 1, 2, 3, 4, 5 }):count()
+  print(count)
+end
 
-print("split")
-local even, odd = stream(range(1, 10)):split(isEven)
-even:foreach(print)
-odd:foreach(print)
+do
+  print("skip")
+  stream.new({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }):skip(5):foreach(print)
+end
 
-print("reduce")
-local _sum = stream({ 1, 2, 3, 4, 5 }):reduce(0, sum)
-print(_sum)
+do
+  print("reverse")
+  stream.new({ 1, 2, 3, 4, 5 }):reverse():foreach(print)
+end
 
-print("merge")
-local s1 = stream({ 1, 2, 3 })
-local s2 = stream({ 5, 6, 7, 8 })
-local s3 = stream({ 9 })
-s1:merge(s2, s3):foreach(print)
+do
+  print("distinct")
+  stream.new({ 1, 2, 3, 2, 4, 2, 5, 2, 5, 1 }):distinct():foreach(print)
+end
+
+do
+  print("peek")
+  stream.new({ 1, 2, 3, 4 }):peek(print):last()
+end
+
+do
+  print("allmatch")
+  local allmatch = stream.new({ 2, 4, 6, 8 }):allmatch(isEven)
+  print(allmatch)
+end
+
+do
+  print("anymatch")
+  local anymatch = stream.new({ 1, 2, 3 }):anymatch(isEven)
+  print(anymatch)
+end
+
+do
+  print("nonematch")
+  local nonematch = stream.new({ 1, 3, 5, 7 }):nonematch(isEven)
+  print(nonematch)
+end
+
+do
+  print("flatmap")
+  stream.new({ 0, 4, 5 }):flatmap(fibbon):foreach(print)
+end
+
+do
+  print("flatten")
+  stream.new({ { 1, 2, 3 }, { 4, 5 }, { 6 }, {}, { 7, 8, 9 } }):flatten():foreach(print)
+end
+
+do
+  print("concat 1")
+  stream.new({ 1, 2, 3, 4, 5 }):concat(stream.new({ 6, 7, 8, 9 })):foreach(print)
+end
+
+do
+  print("concat 2")
+  stream.new({ 1, 2, 3 }):concat(stream.new({ 4, 5, 6 }), stream.new({ 7, 8, 9 })):foreach(print)
+end
+
+do
+  print("group")
+  local group = stream.new({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }):group(isEven)
+  stream.new(group[true]):foreach(print)
+  stream.new(group[false]):foreach(print)
+end
+
+do
+  print("split")
+  local even, odd = stream.rangeclosed(1, 10):split(isEven)
+  even:foreach(print)
+  odd:foreach(print)
+end
+
+do
+  print("reduce")
+  local _sum = stream.new({ 1, 2, 3, 4, 5 }):reduce(0, sum)
+  print(_sum)
+end
+
+do
+  print("merge")
+  local s1 = stream.new({ 1, 2, 3 })
+  local s2 = stream.new({ 5, 6, 7, 8 })
+  local s3 = stream.new({ 9 })
+  s1:merge(s2, s3):foreach(print)
+end
