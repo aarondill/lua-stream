@@ -535,3 +535,29 @@ do
   local aact = Stream.iterate(0, incr):toarray()
   assert_equals(aact, aexp)
 end
+
+do
+  print("Testing Stream.nonnil 1")
+  local x = 0
+  local incr = function()
+    x = x + 1
+    return x < 10 and x or nil
+  end
+  local aexp = { 1, 2, 3, 4, 5, 6, 7, 8, 9, n = 9 }
+  local aact = Stream.nonnil(incr):toarray()
+  assert_equals(aact, aexp)
+end
+
+do
+  print("Testing Stream.nonnil 2")
+  local aexp = { 1, 2, 3, 4, 5, 6, 7, n = 7 }
+  local aact = Stream.nonnil({ 1, 2, 3, 4, 5, 6, 7, nil, 8, 9, 10, n = 11 }):toarray()
+  assert_equals(aact, aexp)
+end
+
+do
+  print("Testing Stream.nonnil 3")
+  local aexp = { 1, 2, 3, n = 3 }
+  local aact = Stream.nonnil(Stream.new({ 1, 2, 3, nil, 4, 5, 6, 7, n = 8 })):toarray()
+  assert_equals(aact, aexp)
+end
