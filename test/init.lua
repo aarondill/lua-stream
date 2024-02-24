@@ -350,11 +350,11 @@ do
 end
 
 do
-  print("Testing split")
-  local function is_odd(x) return x % 2 == 0 end
+  print("Testing split 1")
+  local function is_even(x) return x % 2 == 0 end
   local aexp1 = { 2, 4, n = 2 }
   local aexp2 = { 1, 3, n = 2 }
-  local s1, s2 = Stream.new({ 1, 2, 3, 4 }):split(is_odd)
+  local s1, s2 = Stream.new({ 1, 2, 3, 4 }):split(is_even)
 
   do
     local aexp = aexp1
@@ -364,6 +364,25 @@ do
   do
     local aexp = aexp2
     local aact = s2:toarray()
+    assert_equals(aact, aexp)
+  end
+end
+
+do
+  print("Testing split 2")
+  local function is_even(x) return x % 2 == 0 end
+  local aexp1 = { 2, 4, 6, 8, 10, n = 5 }
+  local aexp2 = { 1, 3, 5, 7, 9, n = 5 }
+  local even, odd = Stream.rangeclosed(1, 10):split(is_even)
+
+  do
+    local aexp = aexp1
+    local aact = even:toarray()
+    assert_equals(aact, aexp)
+  end
+  do
+    local aexp = aexp2
+    local aact = odd:toarray()
     assert_equals(aact, aexp)
   end
 end
