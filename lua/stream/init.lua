@@ -6,6 +6,9 @@ local unpack = table.unpack or unpack
 
 ---@class Stream
 local Stream = {}
+---@class StreamStatic
+local StreamStatic = {}
+
 ---@alias StreamIterator<T> fun(): e: T, done: boolean
 ---A table.pack like table -- may also be a regular array
 ---@alias NTable<T> T[]|{n?: integer}
@@ -64,7 +67,7 @@ function Stream:concat(...)
     streams[i + 1] = s.iter -- collect all the iterators
   end
   local i, len = 1, #streams
-  return Stream.new(function()
+  return StreamStatic.new(function()
     if i > len then return nil, true end
     local it = streams[i]
     while true do
@@ -83,7 +86,7 @@ end
 ---@return Stream
 function Stream:peek(f)
   assert(type(f) == "function", "f must be of type function")
-  return Stream.new(function()
+  return StreamStatic.new(function()
     local e, done = self.iter()
     if not done then f(e) end
     return e, done
@@ -95,7 +98,7 @@ end
 ---@return Stream
 function Stream:filter(f)
   assert(type(f) == "function", "f must be of type function")
-  return Stream.new(function()
+  return StreamStatic.new(function()
     while true do
       local e, done = self.iter()
       if done then break end
@@ -109,7 +112,7 @@ end
 ---@param n integer
 ---@return Stream s a Stream<T[]> where [].n<=n
 function Stream:pack(n)
-  return Stream.new(function() ---@return NTable<unknown>
+  return StreamStatic.new(function() ---@return NTable<unknown>
     local result, len = nil, 0
     for _ = 1, n do
       local e, done = self.iter()
@@ -130,7 +133,7 @@ end
 ---@return Stream
 function Stream:map(f)
   assert(type(f) == "function", "f must be of type function")
-  return Stream.new(function()
+  return StreamStatic.new(function()
     local e, done = self.iter()
     if done then return nil, true end
     return f(e), false
@@ -144,7 +147,7 @@ end
 function Stream:flatmap(f)
   assert(type(f) == "function", "f must be of type function")
   local it = nil
-  return Stream.new(function()
+  return StreamStatic.new(function()
     while true do
       if it == nil then -- we have no current iterator, generate a new one
         local e, done = self.iter()
@@ -171,7 +174,7 @@ end
 ---@return Stream
 function Stream:distinct()
   local processed, seen_nil = {}, false
-  return Stream.new(function()
+  return StreamStatic.new(function()
     while true do
       local e, done = self.iter()
       if done then break end
@@ -217,7 +220,7 @@ end
 ---@return Stream
 function Stream:limit(max)
   local count = 0
-  return Stream.new(function()
+  return StreamStatic.new(function()
     count = count + 1
     if count > max then return nil, true end
     return self.iter()
@@ -231,7 +234,7 @@ end
 ---@return Stream
 function Stream:skip(num)
   local i = 0
-  return Stream.new(function()
+  return StreamStatic.new(function()
     while i < num do -- skip n elements
       i = i + 1
       local _, done = self.iter()
@@ -291,7 +294,7 @@ function Stream:shuffle()
     local j = rand(i) -- pick a random index
     result[i], result[j] = result[j], result[i]
   end
-  return Stream.new(result)
+  return StreamStatic.new(result)
 end
 
 -- Returns a table which is grouping the elements of this stream by keys provided from
@@ -346,7 +349,7 @@ function Stream:split(f)
       return nil, true
     end
   end
-  return Stream.new(pull(true, a1, a2)), Stream.new(pull(false, a2, a1))
+  return StreamStatic.new(pull(true, a1, a2)), StreamStatic.new(pull(false, a2, a1))
 end
 
 -- Returns a lazily merged stream whose elements are all the elements of this stream
@@ -360,7 +363,7 @@ function Stream:merge(...)
     itarr[i + 1] = s.iter
   end
   local idx = 1
-  return Stream.new(function()
+  return StreamStatic.new(function()
     local len = #itarr
     if len == 0 then return nil, true end
     for _ = 1, len do
@@ -423,7 +426,7 @@ function Stream:reverse()
   for i = 1, len / 2 do
     result[i], result[len - i + 1] = result[len - i + 1], result[i]
   end
-  return Stream.new(result)
+  return StreamStatic.new(result)
 end
 
 -- Returns a stream consisting of the elements of this stream, sorted according to the
@@ -435,7 +438,7 @@ end
 function Stream:sort(comp)
   local result = self:toarray()
   table.sort(result, comp)
-  return Stream.new(result)
+  return StreamStatic.new(result)
 end
 
 --- Returns the concatenation of elements by delim
@@ -591,9 +594,6 @@ function Stream:nonematch(p) return not self:anymatch(p) end
 ------------------------------------------------------------------------------
 -------------------------------- Constructors --------------------------------
 ------------------------------------------------------------------------------
-
----@class StreamStatic
-local StreamStatic = {}
 ---This function returns a sequential stream with the provided input as its source.
 ---Depending on the type of `input`, a different stream is returned:
 ---* table:     The new stream is created from the integer elements of the table, just like ipairs
@@ -654,7 +654,7 @@ end
 ---@param endExclusive integer
 ---@return Stream
 function StreamStatic.range(startInclusive, endExclusive)
-  if startInclusive == endExclusive then return Stream.empty() end
+  if startInclusive == endExclusive then return StreamStatic.empty() end
   local delta = endExclusive > startInclusive and 1 or -1
   --- Note: (startInclusive - d) because the first result will be (startInclusive-d)+d
   return StreamStatic.iterate(startInclusive - delta, function(x)
