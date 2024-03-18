@@ -1,0 +1,6 @@
+<!-- vim: set ft=markdown:  -->
+
+- add stream:clone() operation
+  - @return Stream, Stream
+  - On pull from either stream, place items in a cached array (see :merge)
+  - Fetch from backlog if present, else generate new items
