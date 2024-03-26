@@ -483,6 +483,12 @@ do
   assert_equals(act2, exp)
 end
 
+-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+---------------------------------STATIC METHODS---------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
 do
   print("Testing Stream.range 1")
   local aexp = { 1, 2, 3, 4, 5, 6, n = 6 }
@@ -566,7 +572,7 @@ do
   print("Testing Stream.iterate 2")
   local aexp = { 1, 2, 3, 4, 5, 6, 7, n = 7 }
   local incr = function(x)
-    if x >= #aexp then return nil, true end
+    if x >= aexp.n then return nil, true end
     return x + 1, false
   end
   local aact = Stream.iterate(0, incr):toarray()
