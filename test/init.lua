@@ -466,6 +466,24 @@ do
 end
 
 do
+  print("Testing clone 1")
+  local exp = { 1, 3, 2, n = 3 }
+  local s1, s2 = Stream.new({ 1, 3, 2 }):clone()
+  local act1, act2 = s1:toarray(), s2:toarray()
+  assert_equals(act1, exp)
+  assert_equals(act2, exp)
+end
+
+do
+  print("Testing clone 2")
+  local exp = { 1, 2, 3, 4, 5, 6, 7, 8, 9, n = 9 }
+  local s1, s2 = Stream.iterate(0, function(i) return i + 1, (i + 1) >= 10 end):clone()
+  local act1, act2 = s1:toarray(), s2:toarray()
+  assert_equals(act1, exp)
+  assert_equals(act2, exp)
+end
+
+do
   print("Testing Stream.range 1")
   local aexp = { 1, 2, 3, 4, 5, 6, n = 6 }
   local aact = Stream.range(1, 7):toarray()

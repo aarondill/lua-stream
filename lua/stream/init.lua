@@ -80,6 +80,31 @@ function Stream:concat(...)
   end)
 end
 
+---Returns two streams, each of which returns the same elements
+---@return Stream, Stream
+function Stream:clone()
+  local iter = self.iter
+  --- A cache to store elements when each stream is pulled from
+  local a1, a2 = { n = 0 }, { n = 0 }
+  local function pull(elems, others)
+    return function() ---@type StreamIterator
+      if elems.n > 0 then -- if there's pending elems, return them
+        elems.n = elems.n - 1 -- remove from the count
+        return table.remove(elems, 1), false
+      end
+      while true do
+        local e, done = iter()
+        if done then return nil, true end -- out of elements (this stream)
+
+        table.insert(others, e)
+        others.n = others.n + 1 -- add to the count
+        return e, false
+      end
+    end
+  end
+  return StreamStatic.new(pull(a1, a2)), StreamStatic.new(pull(a2, a1))
+end
+
 -- Returns a stream consisting of the elements of this stream, additionally performing
 -- the provided action on each element as elements are consumed from the resulting stream.
 ---@param f fun(e: unknown): any?
