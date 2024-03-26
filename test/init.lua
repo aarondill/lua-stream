@@ -470,6 +470,7 @@ do
   local exp = { 1, 3, 2, n = 3 }
   local s1, s2 = Stream.new({ 1, 3, 2 }):clone()
   local act1, act2 = s1:toarray(), s2:toarray()
+  assert_equals(act1, act2)
   assert_equals(act1, exp)
   assert_equals(act2, exp)
 end
@@ -479,6 +480,7 @@ do
   local exp = { 1, 2, 3, 4, 5, 6, 7, 8, 9, n = 9 }
   local s1, s2 = Stream.iterate(0, function(i) return i + 1, (i + 1) >= 10 end):clone()
   local act1, act2 = s1:toarray(), s2:toarray()
+  assert_equals(act1, act2)
   assert_equals(act1, exp)
   assert_equals(act2, exp)
 end
