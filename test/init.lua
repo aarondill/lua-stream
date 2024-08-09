@@ -4,7 +4,6 @@ local thisfile = debug.getinfo(1, "S").source:sub(2)
 local thisdir = thisfile:match("(.*)/") or "."
 local rootdir = thisdir .. "/.." -- HACK: This file must be at the root of the tests/ directory
 package.path = table.concat({ package.path, rootdir .. "/?.lua", rootdir .. "/?/init.lua" }, ";")
-local unpack = unpack or table.unpack
 
 local Stream = require("stream")
 local function check(cond, format, ...)
@@ -604,5 +603,19 @@ do
   print("Testing Stream.nonnil 3")
   local aexp = { 1, 2, 3, n = 3 }
   local aact = Stream.nonnil(Stream.new({ 1, 2, 3, nil, 4, 5, 6, 7, n = 8 })):toarray()
+  assert_equals(aact, aexp)
+end
+
+do
+  print("Testing Stream.concat 1")
+  local aexp = { 1, 2, 3, 4, 5, 6, 7, 8, 9, n = 9 }
+  local aact = Stream.concat(Stream.new({ 1, 2, 3, 4 }), (Stream.new({ 5, 6, 7, 8, 9 }))):toarray()
+  assert_equals(aact, aexp)
+end
+
+do
+  print("Testing Stream.concat 2")
+  local aexp = { 1, 2, 3, 4, 5, 6, 7, 8, 9, n = 9 }
+  local aact = Stream.concat(Stream.new({ 1, 2, 3, 4 }), Stream.new({ 5, 6 }), Stream.new({ 7, 8, 9 })):toarray()
   assert_equals(aact, aexp)
 end
