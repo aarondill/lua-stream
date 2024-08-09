@@ -5,7 +5,7 @@
 do
   local thisfile = debug.getinfo(1, "S").source:sub(2)
   local thisdir = thisfile:match("(.*)/") or "."
-  local rootdir = thisdir .. "/.." -- HACK: This file must be at the root of the examples/ directory
+  local rootdir = thisdir .. "/.." -- HACK: This file must be at the root of the doc/ directory
   package.path = table.concat({ package.path, rootdir .. "/?.lua", rootdir .. "/?/init.lua" }, ";")
 end
 
@@ -14,18 +14,16 @@ local stream = require("stream")
 -- Here are some helper functions:
 local function isEven(x) return x % 2 == 0 end
 local function square(x) return x * x end
-local function myavg(iter)
-  local sum = 0
-  local count = 0
-  for e in iter do
-    count = count + 1
-    sum = sum + e
+---Use :avg() instead, this is just for demonstration purposes
+local function myavg(iter) ---@param iter StreamIterator<number>
+  local sum, count = 0, 0
+  while true do
+    local e, done = iter()
+    if done then break end
+    count, sum = count + 1, sum + e
   end
-  if count == 0 then
-    return nil
-  else
-    return sum / count
-  end
+  if count == 0 then return nil end
+  return sum / count
 end
 local function fibbon(x)
   local f = {}
@@ -88,6 +86,22 @@ do
     local second, seconddone = s1:next()
     if not seconddone then print(second) end
   end
+end
+
+do
+  print("next loop")
+  local s1 = stream.new({ 1, 2, 3, 4, 5 })
+
+  --- This can also be written as:
+  --- while true do
+  ---   local next, done = s1:next()
+  ---   if not done then break end
+  ---   print(next)
+  --- end
+  repeat
+    local next, done = s1:next()
+    if not done then print(next) end
+  until done
 end
 
 do
@@ -206,6 +220,17 @@ end
 do
   print("concat 2")
   stream.new({ 1, 2, 3 }):concat(stream.new({ 4, 5, 6 }), stream.new({ 7, 8, 9 })):foreach(print)
+end
+
+do
+  print("concat 3")
+  stream
+    .concat({
+      stream.new({ 1, 2, 3 }),
+      stream.new({ 4, 5, 6 }),
+      stream.new({ 7, 8, 9 }),
+    })
+    :foreach(print)
 end
 
 do
