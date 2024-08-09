@@ -1,0 +1,20 @@
+name: Run tests
+on: [push, workflow_dispatch]
+jobs:
+  run_tests:
+    strategy:
+      matrix:
+        luaVersion:
+          - "5.4.7" # latest stable
+          - "luajit-2.1.0-beta3" # latest beta luajit
+          - "5.3.6" # Awesome lua version v4.3
+          - "5.2.4" # Earliest supported version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: ${{ matrix.luaVersion }}
+      - name: test against lua ${{ matrix.luaVersion }}
+        run: |
+          lua ./test/init.lua
