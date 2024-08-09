@@ -109,13 +109,13 @@ For now, let's have a look into another powerful alternative to create a stream.
 ### Creating a new stream from an iterator function
 
 Internally each stream works with a [Lua iterator](https://www.lua.org/pil/7.1.html).
-This is a parameterless function that produces a new element for each call.
+This is a parameterless function that produces a new element and a boolean value indicating whether the iterator is done.
 
 You can create a new stream from any such function:
 
 ```lua
 function zeros()
-    return 0
+    return 0, false
 end
 
 st = stream(zeros)
@@ -151,7 +151,7 @@ means that it consumes elements from the stream. After this call the stream is
 completely empty.
 
 Another option to limit the number of elements is by limiting the iterator function itself.
-This can be done by returning a `nil` value when the production is finished.
+This can be done by returning true when the production is finished.
 
 Here is an example. The `range()` function is an _iterator factory_ that returns an iterator function
 which produces consecutive numbers in a specified range:
@@ -163,10 +163,10 @@ function range(s,e,step)
   -- return an iterator function for numbers from s to e
   return function()
     -- this should stop any consumer from doing more calls
-    if next > e then return nil end
+    if next > e then return nil, true end
     local current = next
     next = next + step
-    return current
+    return current, false
   end
 end
 
@@ -177,7 +177,7 @@ This produces an array with all integer numbers between 100 and 200 and assigns 
 
 So far, so good. Now that you know how to create a stream, let's see what we can do with it.
 
-### Looping over the elements using `stream.iter`
+### Looping over the elements using `stream.iter` (_NON-NIL VALUES ONLY_)
 
 Further above you have seen that you can print all elements by using the `forach()` operation.
 But this is not the only way to do it.
@@ -201,11 +201,12 @@ iterator function is called. So, if you break from the loop before all elements 
 ### Looping over the elements using the next() operation
 
 If you don't want to consume all elements at once but rather getting the first element of the stream, you may want to use the `next()` operation.
+Note that the next() operation returns `value, done`. The parenthesis are important here.
 
 ```lua
 st = stream({1,2,3})
-print(st:next())
-print(st:next())
+print((st:next()))
+print((st:next()))
 ```
 
 This produces the following output:
@@ -277,6 +278,4 @@ This prints a stream of only even elements to the output:
 8
 ```
 
-_... More to come ..._
-
-In the meanwhile you might want to browse the [examples](http://github.com/mkarneim/lua-stream-api/blob/master/examples.lua).
+In the meanwhile you might want to browse the [examples](./doc/examples.lua).
