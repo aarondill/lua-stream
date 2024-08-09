@@ -1,7 +1,7 @@
 ---Disable the duplicate warnings because they incorrectly mark all definitions in this file as duplicate (due to the symlink)
 ---@diagnostic disable: duplicate-set-field
 ---@diagnostic disable: duplicate-doc-alias
-local pack = table.pack or function(...) return { n = select("#"), ... } end
+local pack = table.pack or function(...) return { n = select("#", ...), ... } end
 local unpack = table.unpack or unpack
 
 ---@class Stream

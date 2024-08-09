@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
 local Stream = require("stream")
 local assert_equals = require("test.luaunit").assertEquals
-local pack = table.pack or function(...) return { n = select("#"), ... } end
+local pack = table.pack or function(...) return { n = select("#", ...), ... } end
 
 local Test = {}
 
