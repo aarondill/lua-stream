@@ -5,12 +5,6 @@ local thisdir = thisfile:match("(.*)/") or "."
 local rootdir = thisdir .. "/.." -- HACK: This file must be at the root of the tests/ directory
 package.path = table.concat({ rootdir .. "/?.lua", rootdir .. "/?/init.lua" }, ";")
 
-local function contains(list, value)
-  for _, v in ipairs(list) do
-    if v == value then return true end
-  end
-  return false
-end
 ---@param args string[]
 ---@return string[] opts, string[] suites
 local function parse_args(args)
@@ -32,7 +26,7 @@ end
 local suites
 arg, suites = parse_args(arg)
 
-local ALL_SUITES = { "stream", "static" }
+local ALL_SUITES = { "instance", "static" }
 
 -- run all suites if no suites were specified
 suites = #suites == 0 and ALL_SUITES or suites
