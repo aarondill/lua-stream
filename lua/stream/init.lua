@@ -133,6 +133,13 @@ function Stream:filter(f)
   end)
 end
 
+-- Returns a stream consisting of the elements of this stream that do not match the given predicate.
+---@param f fun(e: unknown): boolean
+---@return Stream
+function Stream:except(f)
+  return self:filter(function(e) return not f(e) end)
+end
+
 -- Returns a stream consisting of chunks, made of n adjacent elements of the original stream.
 ---@param n integer
 ---@return Stream s a Stream<T[]> where [].n<=n
