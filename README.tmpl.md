@@ -1,4 +1,3 @@
-<!-- This file is generated from README.tmpl.md -->
 # Lua-Stream
 
 An updated version of: [Lua Stream API](https://github.com/mkarneim/lua-stream-api) created by [Michael Karneim](https://github.com/mkarneim/)
@@ -280,17 +279,3 @@ This prints a stream of only even elements to the output:
 ```
 
 In the meanwhile you might want to browse the [examples](./doc/examples.lua).
-
-### Lines of code
-cloc|github.com/AlDanial/cloc v 1.96
---- | ---
-
-Language|files|blank|comment|code
-:-------|-------:|-------:|-------:|-------:
-Lua|6|673|1019|3346
-Markdown|1|80|0|201
-YAML|4|0|2|83
-TOML|1|1|0|9
-JSON|1|0|0|7
---------|--------|--------|--------|--------
-SUM:|13|754|1021|3646
