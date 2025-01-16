@@ -282,16 +282,15 @@ This prints a stream of only even elements to the output:
 In the meanwhile you might want to browse the [examples](./doc/examples.lua).
 
 ### Lines of code
-<sup><sub>Generated at commit 71543302803fe80e887be4ab36a8696c19b2583b</sub></sup>
-cloc|github.com/AlDanial/cloc v 1.96
+<sup><sub>Generated at commit 82f3e65c78aa4b87ecf098aad13ca612320c632d</sub></sup>
+cloc|github.com/AlDanial/cloc v 2.02
 --- | ---
 
 Language|files|blank|comment|code
 :-------|-------:|-------:|-------:|-------:
 Lua|6|673|1019|3346
-Markdown|2|162|1|414
-YAML|4|0|2|105
+Markdown|2|162|1|415
 TOML|1|1|0|9
 JSON|1|0|0|7
 --------|--------|--------|--------|--------
-SUM:|14|836|1022|3881
+SUM:|10|836|1020|3777
